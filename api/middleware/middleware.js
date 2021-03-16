@@ -1,20 +1,108 @@
+const userModel = require('../users/users-model')
+
 function logger(req, res, next) {
+  // console.log(new Date().toISOString())
+  // console.log(req.method)
   // DO YOUR MAGIC
+  // next()
+}logger()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const validateUserId = async (req, res, next) => {
+  const {id} = req.params; //*destructure
+  try{
+    const user = await userModel.getById(id)
+    if(user){
+      req.user = user;
+      next()
+    } else {
+      res.status(404).json({message: 'id not found'})
+    }
+  } catch (err) {
+    res.status(500).json({message: 'error processing request', error: err}) //!error handling here?
+  }
 }
 
-function validateUserId(req, res, next) {
-  const id = req.params;
-  // if(!id){
-    // res.status(400).json({message: 'an id is required to hit this endpoint'})
-  // }
-  console.log(id)
 
-  //* next()
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function validateUser(req, res, next) {
-  // DO YOUR MAGIC
+  const userName = req.body.name;
+  if(typeof userName == 'string' && userName.length > 0){
+    next()
+  } else {
+    res.status(400).json({message: 'invalid name property. Must be a string and at least 1 character long'})
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC

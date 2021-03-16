@@ -16,7 +16,7 @@ const Posts = require("../posts/posts-model");
 
 const router = express.Router(); //* create the single router. Then below append methods to the router?
 
-// RETURN AN ARRAY WITH ALL THE USERS
+//// RETURN AN ARRAY WITH ALL THE USERS
 router.get("/", async (req, res) => {
   try {
     const usersArr = await Users.get();
@@ -26,35 +26,47 @@ router.get("/", async (req, res) => {
   }
 });
 
-// RETURN THE USER OBJECT
-// this needs a middleware to verify user id
-router.get("/:id", validateUserId, async (req, res) => {
-  console.log(req.params.id);
+//// RETURN THE USER OBJECT
+//// this needs a middleware to verify user id
+router.get("/:id", validateUserId, (req, res) =>
+  res.status(200).json(req.user)
+);
+
+//// RETURN THE NEWLY CREATED USER OBJECT
+// this needs a middleware to check that the request body is valid
+router.post("/", async (req, res, next) => {
   try {
-    const singleUser = await Users.getById(req.params.id);
-    if (singleUser) {
-      res.status(200).json(singleUser);
+    const newUserObj = await Users.insert(req.body);
+    if (newUserObj) {
+      res.status(201).json(newUserObj);
     } else {
-      res.status(400).json({
-        message: `You are not going to like this... We have no records of a user with the id of ${req.params.id}`,
-      });
+      res.status(400).json({ message: "uh oh! from .post()" });
     }
-  } catch (err) {}
+  } catch (err) {
+    res.status(500).json(err);
+    // next(err)
+  }
 });
 
-router.post("/", (req, res) => {
-  // RETURN THE NEWLY CREATED USER OBJECT
-  // this needs a middleware to check that the request body is valid
+//* RETURN THE FRESHLY UPDATED USER OBJECT
+// this needs a middleware to verify user id
+// and another middleware to check that the request body is valid
+router.put("/:id", validateUserId, validateUser, async (req, res) => {
+  const id = req.user.id; //*comes from user prop on req added in validateUserId
+  const changes = req.body; //* req original payload
+
+  const updatedUser = await Users.update(id, changes);
+  if (updatedUser) {
+    res.status(200).json({ data: changes, message: "new user updated." });
+  } else {
+    res
+      .status(400)
+      .json({ message: "unable to update user. Please try again" });
+  }
 });
 
-router.put("/:id", (req, res) => {
-  // RETURN THE FRESHLY UPDATED USER OBJECT
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
-});
-
+// RETURN THE FRESHLY DELETED USER OBJECT
 router.delete("/:id", (req, res) => {
-  // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
 });
 
