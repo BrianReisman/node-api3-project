@@ -30,6 +30,8 @@ function validateUser(req, res, next) {
   console.log(req.body);
   if (Object.keys(req.body).length === 0) {
     res.status(400).json({ message: "missing user data" });
+  } else if (Object.keys(req.body).length > 1){
+    res.status(400).json({ message: "please only send an object with 1 property called 'name'" });
   }
   if (typeof userName == "string" && userName.length > 0) {
     next();

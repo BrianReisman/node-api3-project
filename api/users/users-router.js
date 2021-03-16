@@ -33,8 +33,8 @@ router.get("/:id", logger, validateUserId, (req, res) =>
 );
 
 //// RETURN THE NEWLY CREATED USER OBJECT
-// this needs a middleware to check that the request body is valid
-router.post("/", logger, async (req, res, next) => {
+//// this needs a middleware to check that the request body is valid
+router.post("/", logger, validateUser, async (req, res) => {
   try {
     const newUserObj = await Users.insert(req.body);
     if (newUserObj) {
@@ -43,14 +43,13 @@ router.post("/", logger, async (req, res, next) => {
       res.status(400).json({ message: "uh oh! from .post()" });
     }
   } catch (err) {
-    res.status(500).json(err);
-    // next(err)
+    res.status(500).json({ error: err.message }); // next(err)
   }
 });
 
 //* RETURN THE FRESHLY UPDATED USER OBJECT
-// this needs a middleware to verify user id
-// and another middleware to check that the request body is valid
+//// this needs a middleware to verify user id
+//// and another middleware to check that the request body is valid
 router.put("/:id", logger, validateUserId, validateUser, async (req, res) => {
   const id = req.user.id; //*comes from user prop on req added in validateUserId
   const changes = req.body; //* req original payload
@@ -65,9 +64,25 @@ router.put("/:id", logger, validateUserId, validateUser, async (req, res) => {
   }
 });
 
-// RETURN THE FRESHLY DELETED USER OBJECT
-router.delete("/:id", logger, (req, res) => {
-  // this needs a middleware to verify user id
+//// this needs a middleware to verify user id
+router.delete("/:id", logger, validateUserId, async (req, res) => {
+  // RETURN THE FRESHLY DELETED USER OBJECT
+  console.log(req.user);
+  try {
+    const removedUser = await Users.remove(req.params.id);
+    if (removedUser) {
+      res
+        .status(200)
+        .json({
+          message: `user: with id ${req.params.id} has been removed successfully.`,
+          deletedUser: req.user,
+        });
+    } else {
+      res.status(400).json({ message: "error removing user" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "server side error." });
+  }
 });
 
 router.get("/:id/posts", logger, (req, res) => {
@@ -77,19 +92,26 @@ router.get("/:id/posts", logger, (req, res) => {
 
 //// this needs a middleware to verify user id
 //// and another middleware to check that the request body is valid
-router.post("/:id/posts", logger, validateUserId, validatePost, async (req, res) => {
-  try{
-    const newPost = await Posts.insert(req.body)
-    if(newPost){
-      //// RETURN THE NEWLY CREATED USER POST
-      res.status(201).json(req.body)
-    } else {
-      console.log('error')
+router.post(
+  "/:id/posts",
+  logger,
+  validateUserId,
+  validatePost,
+  async (req, res) => {
+    try {
+      const newPost = await Posts.insert(req.body);
+      if (newPost) {
+        //// RETURN THE NEWLY CREATED USER POST
+        res.status(201).json(req.body);
+      } else {
+        console.log("error");
+        res.status(400).json({ message: "error" });
+      }
+    } catch (err) {
+      console.log("error! from within [POST] /:id/posts");
+      res.status(400).json({ message: "error" });
     }
-  } catch (err) {
-    console.log('error! from within [POST] /:id/posts')
   }
-
-});
+);
 
 module.exports = router;
