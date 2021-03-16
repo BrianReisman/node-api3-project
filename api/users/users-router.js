@@ -17,7 +17,7 @@ const Posts = require("../posts/posts-model");
 const router = express.Router(); //* create the single router. Then below append methods to the router?
 
 //// RETURN AN ARRAY WITH ALL THE USERS
-router.get("/", async (req, res) => {
+router.get("/", logger, async (req, res) => {
   try {
     const usersArr = await Users.get();
     res.status(200).json(usersArr);
@@ -28,13 +28,13 @@ router.get("/", async (req, res) => {
 
 //// RETURN THE USER OBJECT
 //// this needs a middleware to verify user id
-router.get("/:id", validateUserId, (req, res) =>
+router.get("/:id", logger, validateUserId, (req, res) =>
   res.status(200).json(req.user)
 );
 
 //// RETURN THE NEWLY CREATED USER OBJECT
 // this needs a middleware to check that the request body is valid
-router.post("/", async (req, res, next) => {
+router.post("/", logger, async (req, res, next) => {
   try {
     const newUserObj = await Users.insert(req.body);
     if (newUserObj) {
@@ -51,7 +51,7 @@ router.post("/", async (req, res, next) => {
 //* RETURN THE FRESHLY UPDATED USER OBJECT
 // this needs a middleware to verify user id
 // and another middleware to check that the request body is valid
-router.put("/:id", validateUserId, validateUser, async (req, res) => {
+router.put("/:id", logger, validateUserId, validateUser, async (req, res) => {
   const id = req.user.id; //*comes from user prop on req added in validateUserId
   const changes = req.body; //* req original payload
 
@@ -66,16 +66,16 @@ router.put("/:id", validateUserId, validateUser, async (req, res) => {
 });
 
 // RETURN THE FRESHLY DELETED USER OBJECT
-router.delete("/:id", (req, res) => {
+router.delete("/:id", logger, (req, res) => {
   // this needs a middleware to verify user id
 });
 
-router.get("/:id/posts", (req, res) => {
+router.get("/:id/posts", logger, (req, res) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
 });
 
-router.post("/:id/posts", (req, res) => {
+router.post("/:id/posts", logger, (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
