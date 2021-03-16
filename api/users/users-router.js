@@ -71,12 +71,10 @@ router.delete("/:id", logger, validateUserId, async (req, res) => {
   try {
     const removedUser = await Users.remove(req.params.id);
     if (removedUser) {
-      res
-        .status(200)
-        .json({
-          message: `user: with id ${req.params.id} has been removed successfully.`,
-          deletedUser: req.user,
-        });
+      res.status(200).json({
+        message: `user: with id ${req.params.id} has been removed successfully.`,
+        deletedUser: req.user,
+      });
     } else {
       res.status(400).json({ message: "error removing user" });
     }
@@ -85,9 +83,20 @@ router.delete("/:id", logger, validateUserId, async (req, res) => {
   }
 });
 
-router.get("/:id/posts", logger, (req, res) => {
-  // RETURN THE ARRAY OF USER POSTS
-  // this needs a middleware to verify user id
+//// this needs a middleware to verify user id
+router.get("/:id/posts", logger, validateUserId, async (req, res) => {
+  console.log("inside of {get}", req.params.id);
+  try {
+    // RETURN THE ARRAY OF USER POSTS
+    const userPosts = await Posts.get();
+    if (userPosts) {
+      res.status(200).json(userPosts);
+    } else {
+      res.status(400).json({ message: "no posts for this user found" });
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 //// this needs a middleware to verify user id
@@ -101,7 +110,6 @@ router.post(
     try {
       const newPost = await Posts.insert(req.body);
       if (newPost) {
-        //// RETURN THE NEWLY CREATED USER POST
         res.status(201).json(req.body);
       } else {
         console.log("error");
