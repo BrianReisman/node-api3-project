@@ -18,7 +18,7 @@ const validateUserId = async (req, res, next) => {
       req.user = user;
       next();
     } else {
-      res.status(404).json({ message: "id not found" });
+      res.status(404).json({ message: `user with the id: '${id}' not found` });
     }
   } catch (err) {
     res.status(500).json({ message: "error processing request", error: err }); //!error handling here?
@@ -27,21 +27,31 @@ const validateUserId = async (req, res, next) => {
 
 function validateUser(req, res, next) {
   const userName = req.body.name;
+  console.log(req.body);
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({ message: "missing user data" });
+  }
   if (typeof userName == "string" && userName.length > 0) {
     next();
   } else {
-    res
-      .status(400)
-      .json({
-        message:
-          "invalid name property. Must be a string and at least 1 character long",
-      });
+    res.status(400).json({ message: "missing required name field" });
   }
 }
 
 function validatePost(req, res, next) {
-  // DO YOUR MAGIC
+  if (Object.keys(req.body).length <= 0) {
+    res.status(400).json({ message: "missing post data" });
+  } else if (!req.body.text) {
+    res.status(400).json({
+      message: "missing required 'text' property on the request body",
+    });
+  } else if (!req.body.user_id) {
+    res.status(400).json({
+      message: "missing required 'user_id' property on the request body",
+    });
+  } else {
+    next();
+  }
 }
 
-// do not forget to expose these functions to other modules
 module.exports = { logger, validateUserId, validateUser, validatePost };

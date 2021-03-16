@@ -75,11 +75,21 @@ router.get("/:id/posts", logger, (req, res) => {
   // this needs a middleware to verify user id
 });
 
-router.post("/:id/posts", logger, (req, res) => {
-  // RETURN THE NEWLY CREATED USER POST
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
+//// this needs a middleware to verify user id
+//// and another middleware to check that the request body is valid
+router.post("/:id/posts", logger, validateUserId, validatePost, async (req, res) => {
+  try{
+    const newPost = await Posts.insert(req.body)
+    if(newPost){
+      //// RETURN THE NEWLY CREATED USER POST
+      res.status(201).json(req.body)
+    } else {
+      console.log('error')
+    }
+  } catch (err) {
+    console.log('error! from within [POST] /:id/posts')
+  }
+
 });
 
-// do not forget to export the router
 module.exports = router;
