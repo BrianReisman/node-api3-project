@@ -1,18 +1,45 @@
+//npm
 const express = require("express");
-const { logger, validateUserId, validateUser, validatePost } = require('../middleware/middleware');
+
+//home grown
+const {
+  logger,
+  validateUserId,
+  validateUser,
+  validatePost,
+} = require("../middleware/middleware");
+const Users = require("../users/users-model");
+const Posts = require("../posts/posts-model");
 
 // You will need `users-model.js` and `posts-model.js` both
 // The middleware functions also need to be required
 
-const router = express.Router(); //* create the singular router. Then below append methods to the router?
+const router = express.Router(); //* create the single router. Then below append methods to the router?
 
-router.get("/", (req, res) => {
-  // RETURN AN ARRAY WITH ALL THE USERS
+// RETURN AN ARRAY WITH ALL THE USERS
+router.get("/", async (req, res) => {
+  try {
+    const usersArr = await Users.get();
+    res.status(200).json(usersArr);
+  } catch (err) {
+    res.status(400).json({ message: "You are not going to like this..." });
+  }
 });
 
-router.get("/:id", (req, res) => {
-  // RETURN THE USER OBJECT
-  // this needs a middleware to verify user id
+// RETURN THE USER OBJECT
+// this needs a middleware to verify user id
+router.get("/:id", validateUserId, async (req, res) => {
+  console.log(req.params.id);
+  try {
+    const singleUser = await Users.getById(req.params.id);
+    if (singleUser) {
+      res.status(200).json(singleUser);
+    } else {
+      res.status(400).json({
+        message: `You are not going to like this... We have no records of a user with the id of ${req.params.id}`,
+      });
+    }
+  } catch (err) {}
 });
 
 router.post("/", (req, res) => {

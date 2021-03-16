@@ -3,7 +3,13 @@ function logger(req, res, next) {
 }
 
 function validateUserId(req, res, next) {
-  // DO YOUR MAGIC
+  const id = req.params;
+  // if(!id){
+    // res.status(400).json({message: 'an id is required to hit this endpoint'})
+  // }
+  console.log(id)
+
+  //* next()
 }
 
 function validateUser(req, res, next) {
